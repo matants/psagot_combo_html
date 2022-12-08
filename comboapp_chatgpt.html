@@ -1,0 +1,147 @@
+<html dir="rtl">
+<head>
+	<title>קומבו פסגות</title>
+	<link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
+	<link rel="manifest" href="favicon/site.webmanifest">
+	<meta charset="utf-8">  
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    /* Add some basic styling to the page */
+    body {
+      font-family: "David", sans-serif;
+      unicode-bidi: embed;
+	  text-align: center;
+    }
+    input {
+      padding: 10px;
+      font-size: 18px;
+	  font-family: "David", sans-serif;
+	  text-align: right;
+	  unicode-bidi: embed;
+    }
+	button {
+	  padding: 10px;
+	  font-size: 18px;
+	  background-color: #4CAF50;
+	  color: white;
+	  border: none;
+	  font-family: "David", sans-serif;
+	  text-align: right;
+	  unicode-bidi: embed;
+	}
+    table {
+      border-collapse: collapse;
+      margin: 20px auto;
+	  font-family: "David", sans-serif;
+	  text-align: right;
+	  unicode-bidi: embed;
+    }
+    td, th {
+      border: 1px solid #dddddd;
+      text-align: right;
+      padding: 8px;
+    }
+    tr:nth-child(even) {
+      background-color: #dddddd;
+    }
+  </style>
+</head>
+<body>
+  <h1>ברוכים הבאים לשלישי פסגות!</h1>
+
+<!-- This is the input field where the user can enter a name -->
+<input id="nameField" type="text" onkeydown="handleKeyDown(event)">
+
+<!-- This is the button that the user can press to add the entered name to the table -->
+<button id="addNameToTableButton" onclick="addNameToTable(nameField.value); enteredNames.add(nameField.value); nameField.value = '';">
+  הוסף לטבלה
+</button>
+
+<div id="tableDiv"></div>
+
+<!-- This is the table that will hold the names and their corresponding counts -->
+<script>
+
+   
+
+  // This function handles the keydown event for the nameField input
+  function handleKeyDown(event) {
+    if (event.key === "Enter") {
+      // If the user pressed the enter key, add the name to the table
+      addNameToTable(nameField.value);
+	  enteredNames.add(nameField.value); 
+	  nameField.value = '';
+    }
+  }
+  
+  let table = {}
+
+  // This function adds a name to the table and updates the count
+  function addNameToTable(name) {
+    table[name] = (table[name] || 0) + 1
+  }
+
+  // This function halves the count of each name that was not entered in the current session
+  function halveUnenteredNames() {
+    for (let name in table) {
+      if (!enteredNames.has(name)) {
+        // if the name was not entered this session, we halve its count
+        table[name] = Math.floor(table[name] / 2)
+      }
+    }
+  }
+
+  // This function saves the state of the table to storage
+  function saveTable() {
+    // Half the count of each unentered name
+    halveUnenteredNames()
+	enteredNames = new Set()
+    // Save the table to storage
+    localStorage.setItem("table", JSON.stringify(table))
+    // Hide all inputs
+    document.getElementById("saveTableButton").style.display = "none";
+    document.getElementById("nameField").style.display = "none";
+    document.getElementById("addNameToTableButton").style.display = "none";
+  }
+
+  // This set will hold the names that were entered in the current session
+  let enteredNames = new Set()
+
+  // Load the saved table from storage, if it exists
+  try {
+    let savedTable = JSON.parse(localStorage.getItem("table"))
+    if (savedTable) {
+      table = { ...table, ...savedTable }
+    }
+  } catch (e) {}
+
+	// This function updates the table div with the current contents of the table
+	function updateTableDiv() {
+	  // Sort the names in the table by their counts, in descending order
+	  let sortedNames = Object.keys(table).sort((a, b) => table[b] - table[a])
+
+	  let tableHtml = '<table><tr><th>שם</th><th>קומבו</th></tr>'
+	  for (let name of sortedNames) {
+		// Only include rows with a count greater than 0
+		if (table[name] > 0) {
+		  tableHtml += `<tr><td>${name}</td><td>${table[name]}</td></tr>`
+		}
+	  }
+	  tableHtml += '</table>'
+	  tableDiv.innerHTML = tableHtml
+	}
+
+  // Update the table div with the initial contents of the table
+  updateTableDiv()
+
+  // Set an interval to update the table div
+  setInterval(updateTableDiv, 100)
+</script>
+
+<!-- This is the button that the user can click to save the table to storage manually -->
+<button id="saveTableButton" onclick="saveTable()">שמור טבלה</button>
+
+</body>
+</html>
