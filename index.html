@@ -82,8 +82,8 @@
 
 	function addNameFullFunction() {
 		if (nameField.value.trim()) {
-			addNameToTable(nameField.value);
-			enteredNames.add(nameField.value); 
+			addNameToTable(nameField.value.trim());
+			enteredNames.add(nameField.value.trim()); 
 			nameField.value = '';
 			document.getElementById("saveTableButton").style.display = "block";		}    
 	}
