@@ -28,8 +28,10 @@
 	  color: white;
 	  border: none;
 	  font-family: "David", sans-serif;
-	  text-align: right;
+	  text-align: center;
 	  unicode-bidi: embed;
+	  margin:auto;
+	  display:block;
 	}
     table {
       border-collapse: collapse;
@@ -46,6 +48,9 @@
     tr:nth-child(even) {
       background-color: #dddddd;
     }
+	.text-center {
+	  text-align: center;
+	}
   </style>
 </head>
 <body>
@@ -55,7 +60,7 @@
 <input id="nameField" type="text" onkeydown="handleKeyDown(event)">
 
 <!-- This is the button that the user can press to add the entered name to the table -->
-<button id="addNameToTableButton" onclick="addNameToTable(nameField.value); enteredNames.add(nameField.value); nameField.value = '';">
+<button id="addNameToTableButton" onclick="addNameFullFunction()">
   הוסף לטבלה
 </button>
 
@@ -64,17 +69,24 @@
 <!-- This is the table that will hold the names and their corresponding counts -->
 <script>
 
-   
+
+
 
   // This function handles the keydown event for the nameField input
   function handleKeyDown(event) {
     if (event.key === "Enter") {
       // If the user pressed the enter key, add the name to the table
-      addNameToTable(nameField.value);
-	  enteredNames.add(nameField.value); 
-	  nameField.value = '';
+      addNameFullFunction()
     }
   }
+
+	function addNameFullFunction() {
+		if (nameField.value.trim()) {
+			addNameToTable(nameField.value);
+			enteredNames.add(nameField.value); 
+			nameField.value = '';
+			document.getElementById("saveTableButton").style.display = "block";		}    
+	}
   
   let table = {}
 
@@ -119,29 +131,81 @@
 
 	// This function updates the table div with the current contents of the table
 	function updateTableDiv() {
-	  // Sort the names in the table by their counts, in descending order
-	  let sortedNames = Object.keys(table).sort((a, b) => table[b] - table[a])
+  // Sort the names in the table by their counts, in descending order
+  let sortedNames = Object.keys(table).sort((a, b) => table[b] - table[a])
 
-	  let tableHtml = '<table><tr><th>שם</th><th>קומבו</th></tr>'
-	  for (let name of sortedNames) {
-		// Only include rows with a count greater than 0
-		if (table[name] > 0) {
-		  tableHtml += `<tr><td>${name}</td><td>${table[name]}</td></tr>`
-		}
-	  }
-	  tableHtml += '</table>'
-	  tableDiv.innerHTML = tableHtml
-	}
+  let tableHtml = '<table><tr><th>שם</th><th>קומבו</th></tr>'
+  for (let name of sortedNames) {
+    // Only include rows with a count greater than 0
+    if (table[name] > 0) {
+      // Add the style attribute to the tr element based on whether the enteredNames set is empty or the name is in the enteredNames set
+      let style = ''
+      if (enteredNames.size === 0) {
+        style = 'style="background-color: white;"'
+      } else if (enteredNames.has(name)) {
+        style = 'style="background-color: lightgreen;"'
+      } else {
+        style = 'style="background-color: lightpink;"'
+      }
+      tableHtml += `<tr ${style}><td>${name}</td><td>${table[name]}</td></tr>`
+    }
+  }
+  tableHtml += '</table>'
+  tableDiv.innerHTML = tableHtml
+}
+
 
   // Update the table div with the initial contents of the table
   updateTableDiv()
 
   // Set an interval to update the table div
   setInterval(updateTableDiv, 100)
+
+
+
+
 </script>
 
 <!-- This is the button that the user can click to save the table to storage manually -->
+<div class="text-center">
 <button id="saveTableButton" onclick="saveTable()">שמור טבלה</button>
+</div>
+
+<script>
+document.getElementById("saveTableButton").style.display = "none";
+
+	// Create a new button element
+	let resetButton = document.createElement("button")
+
+	// Set the innerHTML property of the button element to the text that you want to display on the button
+	resetButton.innerHTML = "אפס טבלה"
+
+	// Add the style attribute to the button element with the value "background-color: red; position: absolute; bottom: 0; left: 0;"
+	resetButton.setAttribute("style", "background-color: lightpink; position: absolute; bottom: 0; left: 0;")
+
+	// Set the onclick event handler of the button element to a function that displays the prompt and resets the table if the user confirms
+	resetButton.onclick = function() {
+	  // Use the confirm() method to display a dialog box with a message and two buttons, "OK" and "Cancel"
+		let response = window.confirm("Are you sure you want to reset the table?")
+
+		// If the user clicks the "OK" button, reset the table
+		if (response === true) {
+		  // Reset the table by setting the table object to an empty object
+		  table = {}
+
+		  // Clear the enteredNames set
+		  enteredNames.clear()
+
+		  // Save the table to storage
+		  localStorage.setItem("table", JSON.stringify(table))
+		}
+	}
+
+	// Add the reset button to the page by appending it to the body element
+	document.body.appendChild(resetButton)
+
+
+</script>
 
 </body>
 </html>
